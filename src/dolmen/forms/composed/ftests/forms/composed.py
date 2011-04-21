@@ -3,28 +3,28 @@ We will define a composed form with two subforms.
 
 Let's grok our example:
 
-  >>> from zeam.form.composed.testing import grok
-  >>> grok('zeam.form.composed.ftests.forms.composed')
+  >>> from dolmen.forms.composed.testing import grok
+  >>> grok('dolmen.forms.composed.ftests.forms.composed')
 
 We can now lookup our form by the name of its class:
 
-  >>> from zope.publisher.browser import TestRequest
+  >>> from cromlech.io.testing import TestRequest
   >>> request = TestRequest()
 
-  >>> from zeam.form.composed.ftests.forms.composed import Content
+  >>> from dolmen.forms.composed.ftests.forms.composed import Content
   >>> context = Content()
 
   >>> from zope import component
   >>> form = component.getMultiAdapter(
   ...     (context, request), name='complexform')
   >>> form
-  <zeam.form.composed.ftests.forms.composed.ComplexForm object at ...>
+  <dolmen.forms.composed.ftests.forms.composed.ComplexForm object at ...>
 
 Our form have subforms:
 
   >>> form.subforms
-  [<zeam.form.composed.ftests.forms.composed.Hello object at ...>,
-   <zeam.form.composed.ftests.forms.composed.ByeBye object at ...>]
+  [<dolmen.forms.composed.ftests.forms.composed.Hello object at ...>,
+   <dolmen.forms.composed.ftests.forms.composed.ByeBye object at ...>]
 
 Each sub form is prefixed differently with the name of the form:
 
@@ -40,14 +40,15 @@ And we can render the form:
     <body>
         <h1>Complex form</h1>
         <div class="subforms">
-          <div class="subform"><form action="http://127.0.0.1" method="post"  enctype="multipart/form-data">
+          <div class="subform"><form action="." method="post"
+          enctype="multipart/form-data" id="form-hello">
             <h2>Hello Form</h2>
             <div class="actions">
               <div class="action">
                 <input type="submit" id="form-hello-action-hello" name="form.hello.action.hello" value="Hello" class="action" />
               </div>
             </div>
-          </form></div> <div class="subform"><form action="http://127.0.0.1" method="post" enctype="multipart/form-data">
+          </form></div> <div class="subform"><form action="." method="post" enctype="multipart/form-data" id="form-byebye">
           <h2>Bye Bye Form</h2>
           <div class="actions">
             <div class="action">
@@ -61,7 +62,7 @@ And we can render the form:
 
 We add some errors to the form:
 
-  >>> from zeam.form.base.errors import Error
+  >>> from dolmen.forms.base.errors import Error
   >>> form = component.getMultiAdapter(
   ...     (context, request), name='complexform')
 
@@ -83,14 +84,14 @@ We add some errors to the form:
             </ul>
         </div>
         <div class="subforms">
-          <div class="subform"><form action="http://127.0.0.1" method="post" enctype="multipart/form-data">
+          <div class="subform"><form action="." method="post" enctype="multipart/form-data" id="form-hello">
             <h2>Hello Form</h2>
             <div class="actions">
               <div class="action">
                 <input type="submit" id="form-hello-action-hello" name="form.hello.action.hello" value="Hello" class="action" />
               </div>
             </div>
-          </form></div> <div class="subform"><form action="http://127.0.0.1" method="post" enctype="multipart/form-data">
+          </form></div> <div class="subform"><form action="." method="post" enctype="multipart/form-data" id="form-byebye">
           <h2>Bye Bye Form</h2>
           <div class="actions">
             <div class="action">
@@ -118,7 +119,7 @@ We add some errors to the SubForm:
     <body>
        <h1>Complex form</h1>
        <div class="subforms">
-       <div class="subform"><form action="http://127.0.0.1" method="post" enctype="multipart/form-data">
+       <div class="subform"><form action="." method="post" enctype="multipart/form-data" id="form-hello">
        <h2>Hello Form</h2>
        <div class="form-error">
            <ul>
@@ -130,7 +131,7 @@ We add some errors to the SubForm:
            <input type="submit" id="form-hello-action-hello" name="form.hello.action.hello" value="Hello" class="action" />
          </div>
        </div>
-       </form></div> <div class="subform"><form action="http://127.0.0.1" method="post" enctype="multipart/form-data">
+       </form></div> <div class="subform"><form action="." method="post" enctype="multipart/form-data" id="form-byebye">
        <h2>Bye Bye Form</h2>
        <div class="actions">
          <div class="action">
@@ -143,9 +144,9 @@ We add some errors to the SubForm:
   </html>
 """
 
-from zeam.form import composed, base
-
+from dolmen.forms import composed, base
 from grokcore import component as grok
+from cromlech.webob.response import Response
 
 
 class Content(grok.Context):
@@ -154,6 +155,7 @@ class Content(grok.Context):
 
 class ComplexForm(composed.ComposedForm):
     label = u"Complex form"
+    responseFactory = Response
 
 
 class Hello(composed.SubForm):

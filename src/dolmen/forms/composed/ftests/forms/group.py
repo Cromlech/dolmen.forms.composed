@@ -5,27 +5,28 @@ subform. It is registered the same way as a SubForm.
 
 Let's grok our example:
 
-    >>> from zeam.form.composed.testing import grok
-    >>> grok('zeam.form.composed.ftests.forms.group')
+    >>> from dolmen.forms.composed.testing import grok
+    >>> grok('dolmen.forms.composed.ftests.forms.group')
 
 We can now lookup our form by the name of its class:
 
-    >>> from zope.publisher.browser import TestRequest
+    >>> from cromlech.io.testing import TestRequest
     >>> request = TestRequest()
 
     >>> animals = Animals()
+    >>> animals.__name__ = 'animals'
 
     >>> from zope import component
     >>> form = component.getMultiAdapter(
     ...     (animals, request), name='zooform')
     >>> form
-    <zeam.form.composed.ftests.forms.group.ZooForm object at ...>
+    <dolmen.forms.composed.ftests.forms.group.ZooForm object at ...>
 
 The form should have the two groups as subforms::
 
     >>> form.subforms
-    [<zeam.form.composed.ftests.forms.group.Birds object at ...>,
-     <zeam.form.composed.ftests.forms.group.Bears object at ...>]
+    [<dolmen.forms.composed.ftests.forms.group.Birds object at ...>,
+     <dolmen.forms.composed.ftests.forms.group.Bears object at ...>]
 
 Each group is prefixed differently with the name of the form:
 
@@ -48,22 +49,17 @@ there ::
     >>> bears = form.getSubForm('form-bears')
     >>> subbears = bears.getSubForm('form-bears-scandinavianbears')
     >>> print subbears.subforms
-    [<zeam.form.composed.ftests.forms.group.BrownBear object at ...>,
-     <zeam.form.composed.ftests.forms.group.PolarBear object at ...>]
-
-We can render the whole form:
-
-    >>> # print form()
+    [<dolmen.forms.composed.ftests.forms.group.BrownBear object at ...>,
+     <dolmen.forms.composed.ftests.forms.group.PolarBear object at ...>]
 
 
 Integration tests
 -----------------
 
-  >>> root = getRootFolder()
-  >>> root['animals'] = animals
+  >>> from infrae.testbrowser.browser import Browser
 
-  >>> from zope.testbrowser.testing import Browser
-  >>> browser = Browser()
+  >>> app = makeApplication(animals, 'zooform')
+  >>> browser = Browser(app)
   >>> browser.handleErrors = False
 
 
@@ -74,11 +70,17 @@ We are going just to submit the form without giving any required
 information, and we should get an error:
 
   >>> browser.open('http://localhost/animals/zooform')
-  >>> action = browser.getControl('Growl')
-  >>> action
-  <SubmitControl name='form.bears.grizzly.action.growl' type='submit'>
+  200
+
+  >>> # print browser.contents
+
+  >>> form = browser.get_form(id='form-bears-grizzly')
+  >>> action = form.get_control('form.bears.grizzly.action.growl')
+  >>> action.name, action.type
+  ('form.bears.grizzly.action.growl', 'submit')
 
   >>> action.click()
+  200
   >>> 'The Grizzly growled !' in browser.contents
   True
 
@@ -86,8 +88,9 @@ information, and we should get an error:
 """
 
 
-from zeam.form import composed, base
+from dolmen.forms import composed, base
 from grokcore import component as grok
+from cromlech.webob.response import Response
 
 
 class Animals(grok.Context):
@@ -96,6 +99,7 @@ class Animals(grok.Context):
 
 class ZooForm(composed.ComposedForm):
     label = u"A zoo form"
+    responseFactory = Response
 
 
 ## Groups
@@ -156,6 +160,7 @@ class Grizzly(composed.SubForm):
         data, errors = self.extractData()
         if errors:
             return
+
         # In case of success we don't keep request value in the form
         self.ignoreRequest = True
         self.status = u"The Grizzly growled !"

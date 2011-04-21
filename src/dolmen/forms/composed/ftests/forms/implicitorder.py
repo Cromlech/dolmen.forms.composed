@@ -3,35 +3,34 @@ We will define a composed form with some un-ordered subforms.
 
 Let's grok our example:
 
-  >>> from zeam.form.composed.testing import grok
-  >>> grok('zeam.form.composed.ftests.forms.implicitorder')
+  >>> from dolmen.forms.composed.testing import grok
+  >>> grok('dolmen.forms.composed.ftests.forms.implicitorder')
 
 We can now lookup our form by the name of its class:
 
-  >>> from zope.publisher.browser import TestRequest
+  >>> from cromlech.io.testing import TestRequest
   >>> request = TestRequest()
 
-  >>> from zeam.form.composed.ftests.forms.implicitorder import Content
+  >>> from dolmen.forms.composed.ftests.forms.implicitorder import Content
   >>> context = Content()
 
   >>> from zope import component
   >>> form = component.getMultiAdapter(
   ...     (context, request), name='form')
   >>> form
-  <zeam.form.composed.ftests.forms.implicitorder.Form object at ...>
+  <dolmen.forms.composed.ftests.forms.implicitorder.Form object at ...>
 
 Our form have subforms, which are in order D, C, B, and A:
 
   >>> form.subforms
-  [<zeam.form.composed.ftests.forms.implicitorder.ASubForm object at ...>,
-   <zeam.form.composed.ftests.forms.implicitorder.BSubForm object at ...>,
-   <zeam.form.composed.ftests.forms.implicitorder.CSubForm object at ...>,
-   <zeam.form.composed.ftests.forms.implicitorder.DSubForm object at ...>]
+  [<dolmen.forms.composed.ftests.forms.implicitorder.ASubForm object at ...>,
+   <dolmen.forms.composed.ftests.forms.implicitorder.BSubForm object at ...>,
+   <dolmen.forms.composed.ftests.forms.implicitorder.CSubForm object at ...>,
+   <dolmen.forms.composed.ftests.forms.implicitorder.DSubForm object at ...>]
 
 """
 
-from zeam.form import composed
-
+from dolmen.forms import composed
 from grokcore import component as grok
 
 

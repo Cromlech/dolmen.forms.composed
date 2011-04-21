@@ -1,26 +1,42 @@
-zeam.form.composed
+dolmen.forms.composed
 ==================
+
+Test environment
+----------------
+
+   >>> from zope.interface import implements
+   >>> from cromlech.io.interfaces import IRequest, IPublicationRoot
+
+   >>> class Context(object):
+   ...    implements(IPublicationRoot)
+   ...
+   ...    def __init__(self, name, parent):
+   ...        self.__name__ = name
+   ...        self.__parent__ = parent 
+
+   >>> context = Context('content', None)
+
 
 Composed Form
 -------------
 
 This package let you compose more than one form inside an another form.
 
-   >>> from zeam.form.composed import ComposedForm
-   >>> from zope.publisher.browser import TestRequest
+   >>> from dolmen.forms.composed import ComposedForm
+   >>> from cromlech.io.testing import TestRequest
 
    >>> class MyComplexForm(ComposedForm):
    ...    label = u"Complex form"
 
    >>> request = TestRequest()
-   >>> form = MyComplexForm(object(), request)
+   >>> form = MyComplexForm(context, request)
    >>> form
    <MyComplexForm object at ...>
 
 And this implement correctly the form API:
 
-   >>> from zeam.form.base.interfaces import IForm
-   >>> from zeam.form.composed import interfaces
+   >>> from dolmen.forms.base.interfaces import IForm
+   >>> from dolmen.forms.composed import interfaces
    >>> from zope.interface.verify import verifyObject
 
    >>> verifyObject(interfaces.IComposedForm, form)
@@ -35,15 +51,18 @@ Sub Form
 
 A subform goes inside a composed form:
 
-   >>> from zeam.form.composed import SubForm
-   >>> from zeam.form.base.interfaces import IFormCanvas
+   >>> from dolmen.forms.composed import SubForm
+   >>> from dolmen.forms.base.interfaces import IFormCanvas
 
    >>> class MySubForm(SubForm):
    ...    label = u"Sub form"
 
-   >>> subform = MySubForm(object(), request, form)
+   >>> subform = MySubForm(context, request, form)
    >>> subform
    <MySubForm object at ...>
+
+   >>>  #import pdb; pdb.set_trace()
+
 
 And like a composed form this reply to the form API:
 
@@ -61,11 +80,11 @@ A group of subforms is a logical ensemble of subforms, that can be
 nested. They behave like a normal subforms but have some extra
 attributes::
 
-   >>> from zeam.form.composed import SubFormGroup
+   >>> from dolmen.forms.composed import SubFormGroup
 
    >>> class MySubFormGroup(SubFormGroup):
    ...    label = u"Group of sub forms"
 
-   >>> group = MySubFormGroup(object(), request, form)
+   >>> group = MySubFormGroup(context, request, form)
    >>> group
    <MySubFormGroup object at ...>

@@ -1,14 +1,13 @@
+# -*- coding: utf-8 -*-
 
-import grokcore.viewlet
-import grokcore.view
-from grokcore.view.meta.views import default_view_name
-import grokcore.component
 import martian
+import cromlech.io
+import cromlech.browser
+import grokcore.component
 
-import zope.component
-from zope.publisher.interfaces.browser import IDefaultBrowserLayer
-from zeam.form.composed.interfaces import ISubForm
-from zeam.form.composed.form import SubFormBase
+from dolmen.forms.composed.interfaces import ISubForm
+from dolmen.forms.composed.form import SubFormBase
+from zope.component import provideAdapter
 
 
 def set_form_prefix(subform, form, name):
@@ -19,9 +18,9 @@ def set_form_prefix(subform, form, name):
         if not form.prefix:
             set_form_prefix(
                 form,
-                grokcore.viewlet.view.bind().get(form),
-                grokcore.view.name.bind(
-                    get_default=default_view_name).get(form))
+                cromlech.browser.view.bind().get(form),
+                grokcore.component.name.bind(
+                    get_default=cromlech.browser.default_view_name).get(form))
         subform.prefix = '%s.%s' % (form.prefix, name)
 
 
@@ -30,22 +29,22 @@ class SubFormGrokker(martian.ClassGrokker):
     """
     martian.component(SubFormBase)
     martian.directive(grokcore.component.context)
-    martian.directive(grokcore.view.layer, default=IDefaultBrowserLayer)
-    martian.directive(grokcore.viewlet.view)
-    martian.directive(grokcore.view.name, get_default=default_view_name)
+    martian.directive(cromlech.io.request, default=cromlech.io.IRequest)
+    martian.directive(cromlech.browser.view)
+    martian.directive(grokcore.component.name,
+                      get_default=cromlech.browser.default_view_name)
 
     def grok(self, name, factory, module_info, **kw):
         factory.module_info = module_info
         return super(SubFormGrokker, self).grok(
             name, factory, module_info, **kw)
 
-    def execute(self, factory, config, context, layer, view, name, **kw):
+    def execute(self, factory, config, context, request, view, name, **kw):
         set_form_prefix(factory, view, name)
 
-        adapts = (context, view, layer)
+        adapts = (context, view, request)
         config.action(
             discriminator=('adapter', adapts, ISubForm, name),
-            callable=zope.component.provideAdapter,
-            args=(factory, adapts, ISubForm, name),
-            )
+            callable=provideAdapter,
+            args=(factory, adapts, ISubForm, name))
         return True

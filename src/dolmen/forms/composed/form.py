@@ -1,19 +1,22 @@
+# -*- coding: utf-8 -*-
 
-from megrok import pagetemplate as pt
-from grokcore.viewlet.util import sort_components
-from grokcore import component as grok
-from zope import component
+from dolmen.template import ITemplate, TALTemplate
+from dolmen.forms.base import Fields, Form, FormCanvas
+from dolmen.forms.composed.interfaces import (
+    ISubFormGroup, ISubForm, ISimpleSubForm, IComposedForm)
 
-from zeam.form.base import form
-from zeam.form.composed import interfaces
+from grokcore.component.util import sort_components
+from grokcore.component import baseclass, adapter, implementer
 
-pt.templatedir('default_templates')
+from zope.component import getAdapters, getMultiAdapter
+from zope.interface import implements, Interface
 
 
 class SubFormBase(object):
     """Base class to be applied on a FormCanvas to get a subform.
     """
-    grok.baseclass()
+    baseclass()
+
     # Set prefix to None, so it's changed by the grokker
     label = u''
     description = u''
@@ -22,6 +25,10 @@ class SubFormBase(object):
     def __init__(self, context, parent, request):
         super(SubFormBase, self).__init__(context, request)
         self.parent = parent
+
+    @property
+    def template(self):
+        return getMultiAdapter((self, self.request), ITemplate)
 
     def available(self):
         return True
@@ -32,20 +39,30 @@ class SubFormBase(object):
     def getComposedForm(self):
         return self.parent.getComposedForm()
 
+    def render(self):
+        return self.template.render(self)
+
 
 class SubFormGroupBase(object):
     """A group of subforms: they can be grouped inside a composed form.
     """
-    grok.implements(interfaces.ISubFormGroup)
+    implements(ISubFormGroup)
 
     def __init__(self, context, request):
-        super(SubFormGroupBase, self).__init__(context, request)
+        self.context = context
+        self.request = request
+
         # retrieve subforms by adaptation
-        subforms = map(lambda f: f[1], component.getAdapters(
-                (self.context, self,  self.request), interfaces.ISubForm))
+        subforms = map(lambda f: f[1], getAdapters(
+                (self.context, self,  self.request), ISubForm))
+
         # sort them
         self.allSubforms = sort_components(subforms)
         self.subforms = self._getAvailableSubForms()
+
+    @property
+    def template(self):
+        return getMultiAdapter((self, self.request), ITemplate)
 
     def getSubForm(self, identifier):
         for form in self.subforms:
@@ -59,7 +76,7 @@ class SubFormGroupBase(object):
     def htmlId(self):
         return self.prefix.replace('.', '-')
 
-    def update(self):
+    def update(self, *args, **kwargs):
         # Call update for all forms
         for subform in self.allSubforms:
             subform.update()
@@ -84,52 +101,81 @@ class SubFormGroupBase(object):
         # filter out unavailables ones
         return filter(lambda f: f.available(), self.allSubforms)
 
+    def render(self):
+        return self.template.render(self)
 
-class SubForm(SubFormBase, form.FormCanvas):
+
+class SubForm(SubFormBase, FormCanvas):
     """Form designed to be included in an another form (a
     ComposedForm).
     """
-    grok.baseclass()
-    grok.implements(interfaces.ISimpleSubForm)
+    baseclass()
+    implements(ISimpleSubForm)
+
+    def namespace(self):
+        namespace = FormCanvas.namespace(self)
+        namespace['form'] = self
+        return namespace
 
 
-class SubFormTemplate(pt.PageTemplate):
-    """Default template for a SubForm
-    """
-    pt.view(SubForm)
-
-
-class SubFormGroup(SubFormBase, SubFormGroupBase, form.GrokViewSupport):
+class SubFormGroup(SubFormBase, SubFormGroupBase):
     """A group of subforms.
     """
-    grok.baseclass()
-    grok.implements(interfaces.ISubForm)
+    baseclass()
+    implements(ISubForm)
+
+    def namespace(self):
+        namespace = {}
+        namespace['context'] = self.context
+        namespace['request'] = self.request
+        namespace['form'] = self
+        namespace['subforms'] = self.subforms
+        return namespace
 
     def available(self):
         return len(self.subforms) != 0
 
 
-class SubFormGroupTemplate(pt.PageTemplate):
-    """Default template for a SubFormGroup.
-    """
-    pt.view(SubFormGroup)
-
-
-class ComposedForm(SubFormGroupBase, form.Form):
+class ComposedForm(SubFormGroupBase, Form):
     """A form which is composed of other forms (SubForm).
     """
-    grok.baseclass()
-    grok.implements(interfaces.IComposedForm)
+    baseclass()
+    implements(IComposedForm)
+
+    def __init__(self, context, request):
+        SubFormGroupBase.__init__(self, context, request)
+        Form.__init__(self, context, request)
+        
+    def update(self):
+        SubFormGroupBase.update(self)
+        Form.update(self)
 
     def updateForm(self):
         action, status = SubFormGroupBase.updateActions(self)
         if action is None:
-            form.Form.updateActions(self)
+            Form.updateActions(self)
         SubFormGroupBase.updateWidgets(self)
-        form.Form.updateWidgets(self)
+        Form.updateWidgets(self)
 
 
-class ComposedFormTemplate(pt.PageTemplate):
-    """Default template for a ComposedForm.
-    """
-    pt.view(ComposedForm)
+# Templates
+import os.path
+
+PATH = os.path.join(os.path.dirname(__file__), 'templates')
+
+@implementer(ITemplate)
+@adapter(SubForm, Interface)
+def subform_template(form, request):    
+    return TALTemplate(os.path.join(PATH, 'subform.pt'))
+
+
+@implementer(ITemplate)
+@adapter(ComposedForm, Interface)
+def composedform_template(form, request):
+    return TALTemplate(os.path.join(PATH, 'composedform.pt'))
+
+
+@implementer(ITemplate)
+@adapter(SubFormGroup, Interface)
+def subformgroup_template(form, request):
+    return TALTemplate(os.path.join(PATH, 'subformgroup.pt'))
