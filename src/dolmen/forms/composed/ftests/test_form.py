@@ -42,7 +42,8 @@ FunctionalLayer = BrowserLayer(dolmen.forms.base)
 
 
 def suiteFromPackage(name):
-    optionflags = doctest.NORMALIZE_WHITESPACE | doctest.ELLIPSIS
+    optionflags = (
+        doctest.NORMALIZE_WHITESPACE | doctest.ELLIPSIS |doctest.REPORT_NDIFF)
     globs = {'makeApplication': FunctionalLayer.makeApplication}
     files = resource_listdir(__name__, name)
     suite = unittest.TestSuite()

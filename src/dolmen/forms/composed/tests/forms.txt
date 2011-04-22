@@ -57,12 +57,9 @@ A subform goes inside a composed form:
    >>> class MySubForm(SubForm):
    ...    label = u"Sub form"
 
-   >>> subform = MySubForm(context, request, form)
+   >>> subform = MySubForm(context, form, request)
    >>> subform
    <MySubForm object at ...>
-
-   >>>  #import pdb; pdb.set_trace()
-
 
 And like a composed form this reply to the form API:
 

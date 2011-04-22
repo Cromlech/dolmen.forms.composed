@@ -25,6 +25,7 @@ tests_require = [
     'WebOb',
     'dolmen.location',
     'cromlech.webob',
+    'cromlech.browser [test]',
     'infrae.testbrowser',
     ]
 

@@ -39,7 +39,7 @@ class SubFormBase(object):
     def getComposedForm(self):
         return self.parent.getComposedForm()
 
-    def render(self):
+    def render(self, *args, **kwargs):
         return self.template.render(self)
 
 
@@ -76,7 +76,7 @@ class SubFormGroupBase(object):
     def htmlId(self):
         return self.prefix.replace('.', '-')
 
-    def update(self, *args, **kwargs):
+    def update(self):
         # Call update for all forms
         for subform in self.allSubforms:
             subform.update()
@@ -101,7 +101,7 @@ class SubFormGroupBase(object):
         # filter out unavailables ones
         return filter(lambda f: f.available(), self.allSubforms)
 
-    def render(self):
+    def render(self, *args, **kwargs):
         return self.template.render(self)
 
 
@@ -146,9 +146,9 @@ class ComposedForm(SubFormGroupBase, Form):
         SubFormGroupBase.__init__(self, context, request)
         Form.__init__(self, context, request)
         
-    def update(self):
+    def update(self, *args, **kwargs):
         SubFormGroupBase.update(self)
-        Form.update(self)
+        Form.update(self, *args, **kwargs)
 
     def updateForm(self):
         action, status = SubFormGroupBase.updateActions(self)
