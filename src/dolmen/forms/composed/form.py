@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from dolmen.template import ITemplate, TALTemplate
-from dolmen.forms.base import Fields, Form, FormCanvas
+from dolmen.forms.base import Form, FormCanvas
 from dolmen.forms.composed.interfaces import (
     ISubFormGroup, ISubForm, ISimpleSubForm, IComposedForm)
 
@@ -145,7 +145,7 @@ class ComposedForm(SubFormGroupBase, Form):
     def __init__(self, context, request):
         SubFormGroupBase.__init__(self, context, request)
         Form.__init__(self, context, request)
-        
+
     def update(self, *args, **kwargs):
         SubFormGroupBase.update(self)
         Form.update(self, *args, **kwargs)
@@ -163,9 +163,10 @@ import os.path
 
 PATH = os.path.join(os.path.dirname(__file__), 'templates')
 
+
 @implementer(ITemplate)
 @adapter(SubForm, Interface)
-def subform_template(form, request):    
+def subform_template(form, request):
     return TALTemplate(os.path.join(PATH, 'subform.pt'))
 
 

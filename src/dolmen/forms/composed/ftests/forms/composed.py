@@ -60,7 +60,8 @@ We add some errors to the SubForm:
   >>> form = component.getMultiAdapter(
   ...     (context, request), name='complexform')
 
-  >>> form.subforms[0].errors.append(Error(u'Error in SubForm', identifier=form.subforms[0].prefix))
+  >>> form.subforms[0].errors.append(
+  ...   Error(u'Error in SubForm', identifier=form.subforms[0].prefix))
   >>> len(form.subforms[0].errors)
   1
 
@@ -100,7 +101,6 @@ class ByeBye(composed.SubForm):
     actions = base.Actions(base.Action("Bye Bye"))
 
 
-
 expected_sub = """
   <html>
     <head>
@@ -113,14 +113,18 @@ expected_sub = """
             <h2>Hello Form</h2>
             <div class="actions">
               <div class="action">
-                <input type="submit" id="form-hello-action-hello" name="form.hello.action.hello" value="Hello" class="action" />
+                <input type="submit" id="form-hello-action-hello"
+                name="form.hello.action.hello" value="Hello" class="action" />
               </div>
             </div>
-          </form></div> <div class="subform"><form action="." method="post" enctype="multipart/form-data" id="form-byebye">
+          </form></div> <div class="subform"><form action="."
+          method="post" enctype="multipart/form-data" id="form-byebye">
           <h2>Bye Bye Form</h2>
           <div class="actions">
             <div class="action">
-               <input type="submit" id="form-byebye-action-bye-bye" name="form.byebye.action.bye-bye" value="Bye Bye" class="action" />
+               <input type="submit" id="form-byebye-action-bye-bye"
+               name="form.byebye.action.bye-bye" value="Bye Bye"
+               class="action" />
             </div>
           </div>
         </form></div>
@@ -140,18 +144,24 @@ expected_error = """
             </ul>
         </div>
         <div class="subforms">
-          <div class="subform"><form action="." method="post" enctype="multipart/form-data" id="form-hello">
+          <div class="subform"><form action="." method="post"
+          enctype="multipart/form-data" id="form-hello">
             <h2>Hello Form</h2>
             <div class="actions">
               <div class="action">
-                <input type="submit" id="form-hello-action-hello" name="form.hello.action.hello" value="Hello" class="action" />
+                <input type="submit" id="form-hello-action-hello"
+                name="form.hello.action.hello" value="Hello"
+                class="action" />
               </div>
             </div>
-          </form></div> <div class="subform"><form action="." method="post" enctype="multipart/form-data" id="form-byebye">
+          </form></div> <div class="subform"><form action="."
+          method="post" enctype="multipart/form-data" id="form-byebye">
           <h2>Bye Bye Form</h2>
           <div class="actions">
             <div class="action">
-              <input type="submit" id="form-byebye-action-bye-bye" name="form.byebye.action.bye-bye" value="Bye Bye" class="action" />
+              <input type="submit" id="form-byebye-action-bye-bye"
+              name="form.byebye.action.bye-bye" value="Bye Bye"
+              class="action" />
             </div>
           </div>
         </form></div>
@@ -165,7 +175,8 @@ expected_complex = """<html>
     <body>
        <h1>Complex form</h1>
        <div class="subforms">
-       <div class="subform"><form action="." method="post" enctype="multipart/form-data" id="form-hello">
+       <div class="subform"><form action="." method="post"
+       enctype="multipart/form-data" id="form-hello">
        <h2>Hello Form</h2>
        <div class="form-error">
            <ul>
@@ -174,14 +185,19 @@ expected_complex = """<html>
        </div>
        <div class="actions">
          <div class="action">
-           <input type="submit" id="form-hello-action-hello" name="form.hello.action.hello" value="Hello" class="action" />
+           <input type="submit" id="form-hello-action-hello"
+           name="form.hello.action.hello" value="Hello"
+           class="action" />
          </div>
        </div>
-       </form></div> <div class="subform"><form action="." method="post" enctype="multipart/form-data" id="form-byebye">
+       </form></div> <div class="subform"><form action="."
+       method="post" enctype="multipart/form-data" id="form-byebye">
        <h2>Bye Bye Form</h2>
        <div class="actions">
          <div class="action">
-           <input type="submit" id="form-byebye-action-bye-bye" name="form.byebye.action.bye-bye" value="Bye Bye" class="action" />
+           <input type="submit" id="form-byebye-action-bye-bye"
+           name="form.byebye.action.bye-bye" value="Bye Bye"
+           class="action" />
          </div>
        </div>
        </form></div>

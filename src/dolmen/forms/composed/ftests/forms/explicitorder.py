@@ -46,27 +46,22 @@ class Form(composed.ComposedForm):
 class ASubForm(composed.SubForm):
     composed.view(Form)
     composed.order(20)
-
     label = u"Sub Form A"
 
 
 class CSubForm(composed.SubForm):
     composed.view(Form)
     composed.order(10)
-
     label = u"Sub Form C"
 
 
 class DSubForm(composed.SubForm):
     composed.view(Form)
     composed.order(0)
-
     label = u"Sub Form D"
 
 
 class BSubForm(composed.SubForm):
     composed.view(Form)
     composed.order(15)
-
     label = u"Sub Form B"
-

@@ -84,9 +84,7 @@ information, and we should get an error:
   >>> 'The Grizzly growled !' in browser.contents
   True
 
-  
 """
-
 
 from dolmen.forms import composed, base
 from grokcore import component as grok
