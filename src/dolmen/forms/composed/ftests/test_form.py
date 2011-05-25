@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import cromlech.webob.request
 import doctest
-import dolmen.forms.composed
 import unittest
 import webob.dec
+import dolmen.forms.base
 
+from cromlech.webob.request import Request
 from cromlech.io.interfaces import IPublicationRoot
 from pkg_resources import resource_listdir
 from zope.component import getMultiAdapter
@@ -20,7 +20,7 @@ class WSGIApplication(object):
         self.context = context
         self.formname = formname
 
-    @webob.dec.wsgify(RequestClass=cromlech.webob.request.Request)
+    @webob.dec.wsgify(RequestClass=Request)
     def __call__(self, req):
         form = getMultiAdapter((self.context, req), Interface, self.formname)
         return form()

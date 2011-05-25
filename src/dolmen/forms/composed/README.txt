@@ -1,9 +1,9 @@
 ==================
-zeam.form.composed
+dolmen.forms.composed
 ==================
 
 This package let you defines forms containing other forms in
-`zeam.form.base`_.
+`dolmen.forms.base`_.
 
 .. contents::
 
@@ -12,7 +12,7 @@ Example
 
 Here a simple example. Let's define a setting form::
 
-  from zeam.form import composed, base
+  from dolmen.forms import composed, base
   from zope.interface import Interface
 
 
@@ -45,7 +45,7 @@ settings::
 
 
 Some default templates are included as well, but you can replace like
-you will do in `zeam.form.base`_.
+you will do in `dolmen.forms.base`_.
 
 API
 ===
@@ -55,14 +55,14 @@ Classes
 
 ``ComposedForm``
     This class define a form which able to contain other forms. It
-    behave like a ``zeam.form.base`` Form, but does use its fields.
+    behave like a ``dolmen.forms.base`` Form, but does use its fields.
     A usefull method can give you back a given subform :
     ``getSubForm(identifier)``.
 
 ``SubForm``
     This class represent a form which is contained inside a
     ``ComposedForm``. This form behave exactly like a
-    ``zeam.form.base`` Form to which you add:
+    ``dolmen.forms.base`` Form to which you add:
 
     - a method ``available()`` which is called before anything else to
       know if the form shoud still be included in the ``ComposedForm``.
@@ -85,17 +85,8 @@ the `Grok documentation <http://grok.zope.org>`_ for more information.
 ``context``
     Define for which object the form/sub form is available.
 
-``layer``
-    Define the skin for which the form/sub form is aviable.
-
 ``require``
     Define a permission need to access the form.
-
-``template``
-    Define a Grok-like template for the form. After you done that, the
-    Grok template will be look up and used. You can't use anymore a
-    ``megrok.pagetemplate`` template, unless you set ``template=None``
-    again on your form class.
 
 ``view``
     On a sub form, define for which form the sub form is available.
@@ -104,4 +95,4 @@ the `Grok documentation <http://grok.zope.org>`_ for more information.
     Let you specify a number to sort your sub form afterwards using
     that setting.
 
-.. _zeam.form.base: http://pypi.python.org/pypi/zeam.form.base
+.. _dolmen.forms.base: http://pypi.python.org/pypi/dolmen.forms.base

@@ -10,10 +10,10 @@ history = open(join('docs', 'HISTORY.txt')).read()
 
 
 install_requires = [
+    'cromlech.browser',
+    'cromlech.io',
     'dolmen.forms.base',
     'dolmen.template',
-    'dolmen.view',
-    'dolmen.viewlet',
     'grokcore.component',
     'martian',
     'setuptools',
@@ -23,10 +23,12 @@ install_requires = [
 
 tests_require = [
     'WebOb',
-    'dolmen.location',
-    'cromlech.webob',
     'cromlech.browser [test]',
+    'cromlech.webob',
+    'dolmen.location',
     'infrae.testbrowser',
+    'zope.configuration',
+    'zope.location',
     ]
 
 setup(name=name,
