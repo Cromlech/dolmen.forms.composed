@@ -2,48 +2,52 @@
 
 import martian
 import cromlech.browser
-import grokcore.component
-
+import grokcore.component as grok
+from dolmen.forms.base.interfaces import IPrefixable, IFormCanvas
 from dolmen.forms.composed.interfaces import ISubForm
 from dolmen.forms.composed.form import SubFormBase
-from dolmen.view.meta import default_view_name
 from zope.component import provideAdapter
+
+
+def default_name(factory, module=None, **data):
+    return factory.__name__.lower()
 
 
 def set_form_prefix(subform, form, name):
     """Recursively set the form prefix (to be compatible with groups)
     """
-    # We use __dict__.get not to look if prefix was set in a parent class.
-    if not subform.__dict__.get('prefix'):
-        if not form.prefix:
-            set_form_prefix(
-                form,
-                cromlech.browser.view.bind().get(form),
-                grokcore.component.name.bind(
-                    get_default=cromlech.browser.default_view_name).get(form))
-        subform.prefix = '%s.%s' % (form.prefix, name)
+    prefixable = IPrefixable(form, None)
+    assert prefixable is not None
+
+    if not prefixable.prefix:
+        set_form_prefix(
+            form,
+            cromlech.browser.slot.bind().get(form),
+            grok.name.bind(get_default=default_name).get(form))
+    subform.prefix = '%s.%s' % (form.prefix, name)
 
 
 class SubFormGrokker(martian.ClassGrokker):
     """Grokker to register sub forms.
     """
     martian.component(SubFormBase)
-    martian.directive(grokcore.component.context)
-    martian.directive(
-        cromlech.browser.request, default=cromlech.browser.IRequest)
-    martian.directive(cromlech.browser.view)
-    martian.directive(grokcore.component.name,
-                      get_default=default_view_name)
+    martian.directive(grok.context)
+    martian.directive(grok.name, get_default=default_name)
+    martian.directive(cromlech.browser.request)
+    martian.directive(cromlech.browser.slot)
 
     def grok(self, name, factory, module_info, **kw):
         factory.module_info = module_info
         return super(SubFormGrokker, self).grok(
             name, factory, module_info, **kw)
 
-    def execute(self, factory, config, context, request, view, name, **kw):
-        set_form_prefix(factory, view, name)
+    def execute(self, factory, config, context, request, slot, name, **kw):
 
-        adapts = (context, view, request)
+        assert IFormCanvas.providedBy(slot)
+
+        set_form_prefix(factory, slot, name)
+
+        adapts = (context, slot, request)
         config.action(
             discriminator=('adapter', adapts, ISubForm, name),
             callable=provideAdapter,
