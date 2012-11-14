@@ -103,19 +103,19 @@ class ZooForm(composed.ComposedForm):
 ## Groups
 
 class Birds(composed.SubFormGroup):
-    composed.view(ZooForm)
+    composed.slot(ZooForm)
     composed.order(10)
     label = u"Birds Form"
 
 
 class Bears(composed.SubFormGroup):
-    composed.view(ZooForm)
+    composed.slot(ZooForm)
     composed.order(20)
     label = u"Bears form"
 
 
 class ScandinavianBears(composed.SubFormGroup):
-    composed.view(Bears)
+    composed.slot(Bears)
     composed.order(20)
     label = u"Scandinavian bears form"
 
@@ -123,32 +123,32 @@ class ScandinavianBears(composed.SubFormGroup):
 ## Sub forms
 
 class Eagle(composed.SubForm):
-    composed.view(Birds)
+    composed.slot(Birds)
     composed.order(20)
     actions = base.Actions(base.Action("Catch rabbit"))
 
 
 class Blackbird(composed.SubForm):
-    composed.view(Birds)
+    composed.slot(Birds)
     composed.order(10)
     actions = base.Actions(base.Action("Chirp"))
 
 
 class Vulture(composed.SubForm):
-    composed.view(Birds)
+    composed.slot(Birds)
     composed.order(30)
     fields = base.Fields(base.Field("Size"), base.Field("Weight"))
     actions = base.Actions(base.Action("Eat carcass"))
 
 
 class Firefox(composed.SubForm):
-    composed.view(Bears)
+    composed.slot(Bears)
     composed.order(10)
     actions = base.Actions(base.Action("Eat bamboo"))
 
 
 class Grizzly(composed.SubForm):
-    composed.view(Bears)
+    composed.slot(Bears)
     composed.order(12)
 
     fields = base.Fields(base.Field("Name"), base.Field("Gender"))
@@ -165,13 +165,13 @@ class Grizzly(composed.SubForm):
 
 
 class BrownBear(composed.SubForm):
-    composed.view(ScandinavianBears)
+    composed.slot(ScandinavianBears)
     composed.order(0)
     fields = base.Fields(base.Field("Name"), base.Field("Age"))
     actions = base.Actions(base.Action("Play in pool"))
 
 
 class PolarBear(composed.SubForm):
-    composed.view(ScandinavianBears)
+    composed.slot(ScandinavianBears)
     composed.order(1)
     actions = base.Actions(base.Action("Eat seal"))

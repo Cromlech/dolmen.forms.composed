@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from zope.interface import Interface, Attribute
+from cromlech.browser import ISlot
 from dolmen.forms.base.interfaces import IForm, IFormCanvas, ISimpleFormCanvas
+from zope.interface import Interface, Attribute
 
 
 class ISubForm(IFormCanvas):
@@ -20,7 +21,7 @@ class ISimpleSubForm(ISubForm, ISimpleFormCanvas):
     """
 
 
-class ISubFormGroup(Interface):
+class ISubFormGroup(ISlot):
     """A group of subforms.
     """
     subforms = Attribute("List of available subforms")

@@ -86,7 +86,7 @@ class ComplexForm(composed.ComposedForm):
 
 
 class Hello(composed.SubForm):
-    composed.view(ComplexForm)
+    composed.slot(ComplexForm)
     composed.order(10)
 
     label = u"Hello Form"
@@ -94,7 +94,7 @@ class Hello(composed.SubForm):
 
 
 class ByeBye(composed.SubForm):
-    composed.view(ComplexForm)
+    composed.slot(ComplexForm)
     composed.order(20)
 
     label = u"Bye Bye Form"

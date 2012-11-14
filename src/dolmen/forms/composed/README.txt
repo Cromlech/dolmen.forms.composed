@@ -1,6 +1,6 @@
-==================
+=========================
 dolmen.forms.composed
-==================
+=========================
 
 This package let you defines forms containing other forms in
 `dolmen.forms.base`_.
@@ -26,7 +26,7 @@ After, a module can add some mail settings on that screen::
 
   class MailSetting(composed.SubForm):
       composed.context(MyApplication)
-      composed.view(Setting)
+      composed.slot(Setting)
       composed.order(99)
 
       label = u"Mail delivery settings"
@@ -37,7 +37,7 @@ settings::
 
   class PublicationSetting(composed.SubForm):
       composed.context(MyPublications)
-      composed.view(Setting)
+      composed.slot(Setting)
       composed.order(10)
 
       label = u"Publication settings"
@@ -88,8 +88,8 @@ the `Grok documentation <http://grok.zope.org>`_ for more information.
 ``require``
     Define a permission need to access the form.
 
-``view``
-    On a sub form, define for which form the sub form is available.
+``slot``
+    On a sub form, define for which group form the sub form is available.
 
 ``order``
     Let you specify a number to sort your sub form afterwards using
