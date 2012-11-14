@@ -23,6 +23,7 @@ We can now lookup our form by the name of its class:
 Our form have subforms, which are in order D, C, B, and A, because we
 used the order directive:
 
+  >>> form.update()
   >>> form.subforms
   [<dolmen.forms.composed.ftests.forms.explicitorder.DSubForm object at ...>,
    <dolmen.forms.composed.ftests.forms.explicitorder.CSubForm object at ...>,
@@ -44,24 +45,24 @@ class Form(composed.ComposedForm):
 
 
 class ASubForm(composed.SubForm):
-    composed.view(Form)
+    composed.slot(Form)
     composed.order(20)
     label = u"Sub Form A"
 
 
 class CSubForm(composed.SubForm):
-    composed.view(Form)
+    composed.slot(Form)
     composed.order(10)
     label = u"Sub Form C"
 
 
 class DSubForm(composed.SubForm):
-    composed.view(Form)
+    composed.slot(Form)
     composed.order(0)
     label = u"Sub Form D"
 
 
 class BSubForm(composed.SubForm):
-    composed.view(Form)
+    composed.slot(Form)
     composed.order(15)
     label = u"Sub Form B"

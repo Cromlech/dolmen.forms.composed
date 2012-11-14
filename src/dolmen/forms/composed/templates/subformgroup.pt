@@ -3,7 +3,7 @@
       tal:condition="form.label">Label</h2>
   <p tal:condition="form.description"
      tal:content="form.description">Description</p>
-
+  
   <div class="subform"
        tal:repeat="subform form.subforms"
        tal:content="structure subform.render()">

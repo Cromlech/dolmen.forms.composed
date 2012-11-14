@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
+from cromlech.browser import IRenderable, IRequest
 from dolmen.template import ITemplate, TALTemplate
 from dolmen.forms.base import Form, FormCanvas
+from dolmen.forms.base.errors import Errors
+from dolmen.forms.base.interfaces import IPrefixable
 from dolmen.forms.composed.interfaces import (
     ISubFormGroup, ISubForm, ISimpleSubForm, IComposedForm)
 
@@ -11,13 +14,57 @@ from grokcore.component import baseclass, adapter, implementer
 from zope.component import getAdapters, getMultiAdapter
 from zope.interface import implements, Interface
 
+try:
+    import zope.security
+
+    def check_security(component, attribute):
+        try:
+            return zope.security.canAccess(component, attribute)
+        except zope.security.interfaces.Forbidden:
+            return False
+
+    CHECKER = check_security
+    PROXY = zope.security.checker.ProxyFactory
+except ImportError:
+    CHECKER = None
+    PROXY = None
+
+
+def query_subforms(context, request, form, interface=ISubForm):
+    """Query subforms of the given form :
+
+    * Queries the registry according to context, request, form.
+    * Updates the components.
+    * Returns an iterable of components.
+    """
+
+    def registry_components():
+        for name, component in getAdapters(
+            (context, form, request), interface):
+
+            if CHECKER is not None and not CHECKER(component, 'render'):
+                continue
+
+            component.update()
+            yield component
+
+    assert interface.isOrExtends(ISubForm), "interface must extends ISubForm"
+    assert IRequest.providedBy(request), "request must be an IRequest"
+    return registry_components()
+
+
+def set_prefix(parent, base):
+    prefixable = IPrefixable(parent, None)
+    if prefixable is not None:
+        return '%s.%s' % (prefixable.prefix, base)
+    return base
+    
 
 class SubFormBase(object):
     """Base class to be applied on a FormCanvas to get a subform.
     """
     baseclass()
 
-    # Set prefix to None, so it's changed by the grokker
     label = u''
     description = u''
     prefix = None
@@ -27,8 +74,12 @@ class SubFormBase(object):
         self.parent = parent
 
     @property
-    def template(self):
-        return getMultiAdapter((self, self.request), ITemplate)
+    def base_prefix(self):
+        return self.__class__.__name__.lower()
+
+    def update(self):
+        if self.prefix is None:
+            self.prefix = set_prefix(self.parent, self.base_prefix)
 
     def available(self):
         return True
@@ -39,30 +90,35 @@ class SubFormBase(object):
     def getComposedForm(self):
         return self.parent.getComposedForm()
 
-    def render(self, *args, **kwargs):
-        return self.template.render(self)
-
 
 class SubFormGroupBase(object):
     """A group of subforms: they can be grouped inside a composed form.
     """
     implements(ISubFormGroup)
 
+    subforms = None
+    allSubforms = None
+    prefix = None
+
     def __init__(self, context, request):
         self.context = context
         self.request = request
-
-        # retrieve subforms by adaptation
-        subforms = map(lambda f: f[1], getAdapters(
-                (self.context, self,  self.request), ISubForm))
-
-        # sort them
-        self.allSubforms = sort_components(subforms)
-        self.subforms = self._getAvailableSubForms()
+        self.errors = Errors()
 
     @property
-    def template(self):
-        return getMultiAdapter((self, self.request), ITemplate)
+    def base_prefix(self):
+        return self.__class__.__name__.lower()
+
+    def update(self):
+
+        self.allSubforms = sort_components(
+            query_subforms(self.context, self.request, self))
+
+        self.subforms = filter(lambda f: f.available(), self.allSubforms)
+
+        # set the prefix
+        if self.prefix is None:
+            self.prefix = set_prefix(self.parent, self.base_prefix)
 
     def getSubForm(self, identifier):
         for form in self.subforms:
@@ -76,33 +132,27 @@ class SubFormGroupBase(object):
     def htmlId(self):
         return self.prefix.replace('.', '-')
 
-    def update(self):
-        # Call update for all forms
-        for subform in self.allSubforms:
-            subform.update()
+    def namespace(self):
+        namespace = FormCanvas.namespace(self)
+        namespace['form'] = self
+        return namespace
 
     def updateActions(self):
         # Set/run actions for all forms
         action, status = None, None
-        for subform in self._getAvailableSubForms():
+        for subform in self.subforms:
             action, status = subform.updateActions()
             if action is not None:
                 break
+
         # The result of the actions might have changed the available subforms
-        self.subforms = self._getAvailableSubForms()
+        self.subforms = filter(lambda f: f.available(), self.allSubforms)
         return action, status
 
     def updateWidgets(self):
         # Set widgets for all forms
-        for subform in self._getAvailableSubForms():
+        for subform in self.subforms:
             subform.updateWidgets()
-
-    def _getAvailableSubForms(self):
-        # filter out unavailables ones
-        return filter(lambda f: f.available(), self.allSubforms)
-
-    def render(self, *args, **kwargs):
-        return self.template.render(self)
 
 
 class SubForm(SubFormBase, FormCanvas):
@@ -117,6 +167,14 @@ class SubForm(SubFormBase, FormCanvas):
         namespace['form'] = self
         return namespace
 
+    @property
+    def template(self):
+        return getMultiAdapter((self, self.request), ITemplate)
+
+    def render(self, *args, **kwargs):
+        namespace = self.namespace()
+        return self.template.render(self, target_language=None, **namespace)
+
 
 class SubFormGroup(SubFormBase, SubFormGroupBase):
     """A group of subforms.
@@ -124,16 +182,28 @@ class SubFormGroup(SubFormBase, SubFormGroupBase):
     baseclass()
     implements(ISubForm)
 
-    def namespace(self):
-        namespace = {}
-        namespace['context'] = self.context
-        namespace['request'] = self.request
-        namespace['form'] = self
-        namespace['subforms'] = self.subforms
-        return namespace
+    def update(self, *args, **kwargs):
+        SubFormBase.update(self)
+        SubFormGroupBase.update(self, *args, **kwargs)
 
     def available(self):
-        return len(self.subforms) != 0
+        # This should be computed AFTER an update
+        return bool(self.subforms and len(self.subforms) != 0)
+
+    def namespace(self):
+        return dict(
+            context=self.context,
+            request=self.request,
+            form=self,
+            subforms=self.subforms)
+
+    @property
+    def template(self):
+        return getMultiAdapter((self, self.request), ITemplate)
+
+    def render(self, *args, **kwargs):
+        namespace = self.namespace()
+        return self.template.render(self, target_language=None, **namespace)
 
 
 class ComposedForm(SubFormGroupBase, Form):
@@ -141,6 +211,8 @@ class ComposedForm(SubFormGroupBase, Form):
     """
     baseclass()
     implements(IComposedForm)
+
+    prefix = 'form'
 
     def __init__(self, context, request):
         SubFormGroupBase.__init__(self, context, request)
@@ -156,6 +228,18 @@ class ComposedForm(SubFormGroupBase, Form):
             Form.updateActions(self)
         SubFormGroupBase.updateWidgets(self)
         Form.updateWidgets(self)
+
+        for subform in self.subforms:
+            for error in subform.errors:
+                self.errors.append(error)
+
+    @property
+    def template(self):
+        return getMultiAdapter((self, self.request), ITemplate)
+
+    def render(self, *args, **kwargs):
+        namespace = self.namespace()
+        return self.template.render(self, target_language=None, **namespace)
 
 
 # Templates

@@ -22,8 +22,18 @@ We can now lookup our form by the name of its class:
     >>> form
     <dolmen.forms.composed.ftests.forms.group.ZooForm object at ...>
 
-The form should have the two groups as subforms::
+The form should have the two groups as subforms, but it needs an
+update first::
 
+    >>> form.subforms is None
+    True
+
+    >>> form.update()
+
+    >>> form.allSubforms
+    [<dolmen.forms.composed.ftests.forms.group.Birds object at ...>,
+     <dolmen.forms.composed.ftests.forms.group.Bears object at ...>]
+    
     >>> form.subforms
     [<dolmen.forms.composed.ftests.forms.group.Birds object at ...>,
      <dolmen.forms.composed.ftests.forms.group.Bears object at ...>]

@@ -22,6 +22,7 @@ We can now lookup our form by the name of its class:
 
 Our form have subforms:
 
+  >>> form.update()
   >>> form.subforms
   [<dolmen.forms.composed.ftests.forms.composed.Hello object at ...>,
    <dolmen.forms.composed.ftests.forms.composed.ByeBye object at ...>]
@@ -35,7 +36,7 @@ And we can render the form:
 
   >>> from cromlech.browser.testing import XMLDiff
 
-  >>> rendered = form()
+  >>> rendered = str(form())
   >>> print XMLDiff(rendered, expected_sub)
   None
 
@@ -51,22 +52,8 @@ We add some errors to the form:
   >>> len(form.formErrors)
   1
 
-  >>> rendered = form()
+  >>> rendered = str(form())
   >>> print XMLDiff(rendered, expected_error)
-  None
-
-We add some errors to the SubForm:
-
-  >>> form = component.getMultiAdapter(
-  ...     (context, request), name='complexform')
-
-  >>> form.subforms[0].errors.append(
-  ...   Error(u'Error in SubForm', identifier=form.subforms[0].prefix))
-  >>> len(form.subforms[0].errors)
-  1
-
-  >>> rendered = form()
-  >>> print XMLDiff(rendered, expected_complex)
   None
 
 """
@@ -165,42 +152,6 @@ expected_error = """
             </div>
           </div>
         </form></div>
-      </div>
-    </body>
-  </html>"""
-
-expected_complex = """<html>
-    <head>
-    </head>
-    <body>
-       <h1>Complex form</h1>
-       <div class="subforms">
-       <div class="subform"><form action="." method="post"
-       enctype="multipart/form-data" id="form-hello">
-       <h2>Hello Form</h2>
-       <div class="form-error">
-           <ul>
-             <li> Error in SubForm </li>
-           </ul>
-       </div>
-       <div class="actions">
-         <div class="action">
-           <input type="submit" id="form-hello-action-hello"
-           name="form.hello.action.hello" value="Hello"
-           class="action" />
-         </div>
-       </div>
-       </form></div> <div class="subform"><form action="."
-       method="post" enctype="multipart/form-data" id="form-byebye">
-       <h2>Bye Bye Form</h2>
-       <div class="actions">
-         <div class="action">
-           <input type="submit" id="form-byebye-action-bye-bye"
-           name="form.byebye.action.bye-bye" value="Bye Bye"
-           class="action" />
-         </div>
-       </div>
-       </form></div>
       </div>
     </body>
   </html>"""

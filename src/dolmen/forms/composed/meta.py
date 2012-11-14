@@ -3,28 +3,26 @@
 import martian
 import cromlech.browser
 import grokcore.component as grok
-from dolmen.forms.base.interfaces import IPrefixable, IFormCanvas
-from dolmen.forms.composed.interfaces import ISubForm
+from dolmen.forms.base.interfaces import IPrefixable, IForm
+from dolmen.forms.composed.interfaces import ISubForm, ISubFormGroup
 from dolmen.forms.composed.form import SubFormBase
 from zope.component import provideAdapter
+from zope.interface.interfaces import IInterface
+
+
+def is_form_slot(value, default=ISubFormGroup):
+    if IInterface.providedBy(value):
+        if not value.isOrExtends(default):
+            return False
+    else:
+        if not default.implementedBy(value):
+            return False
+
+    return True
 
 
 def default_name(factory, module=None, **data):
     return factory.__name__.lower()
-
-
-def set_form_prefix(subform, form, name):
-    """Recursively set the form prefix (to be compatible with groups)
-    """
-    prefixable = IPrefixable(form, None)
-    assert prefixable is not None
-
-    if not prefixable.prefix:
-        set_form_prefix(
-            form,
-            cromlech.browser.slot.bind().get(form),
-            grok.name.bind(get_default=default_name).get(form))
-    subform.prefix = '%s.%s' % (form.prefix, name)
 
 
 class SubFormGrokker(martian.ClassGrokker):
@@ -43,13 +41,12 @@ class SubFormGrokker(martian.ClassGrokker):
 
     def execute(self, factory, config, context, request, slot, name, **kw):
 
-        assert IFormCanvas.providedBy(slot)
-
-        set_form_prefix(factory, slot, name)
+        assert is_form_slot(slot)
 
         adapts = (context, slot, request)
         config.action(
             discriminator=('adapter', adapts, ISubForm, name),
             callable=provideAdapter,
             args=(factory, adapts, ISubForm, name))
+
         return True

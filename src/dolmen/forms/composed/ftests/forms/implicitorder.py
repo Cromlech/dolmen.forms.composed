@@ -22,6 +22,7 @@ We can now lookup our form by the name of its class:
 
 Our form have subforms, which are in order D, C, B, and A:
 
+  >>> form.update()
   >>> form.subforms
   [<dolmen.forms.composed.ftests.forms.implicitorder.ASubForm object at ...>,
    <dolmen.forms.composed.ftests.forms.implicitorder.BSubForm object at ...>,
