@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import martian
-import cromlech.io
 import cromlech.browser
 import grokcore.component
 
 from dolmen.forms.composed.interfaces import ISubForm
 from dolmen.forms.composed.form import SubFormBase
+from dolmen.view.meta import default_view_name
 from zope.component import provideAdapter
 
 
@@ -29,10 +29,11 @@ class SubFormGrokker(martian.ClassGrokker):
     """
     martian.component(SubFormBase)
     martian.directive(grokcore.component.context)
-    martian.directive(cromlech.io.request, default=cromlech.io.IRequest)
+    martian.directive(
+        cromlech.browser.request, default=cromlech.browser.IRequest)
     martian.directive(cromlech.browser.view)
     martian.directive(grokcore.component.name,
-                      get_default=cromlech.browser.default_view_name)
+                      get_default=default_view_name)
 
     def grok(self, name, factory, module_info, **kw):
         factory.module_info = module_info

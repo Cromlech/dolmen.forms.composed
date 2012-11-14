@@ -8,7 +8,7 @@ Let's grok our example:
 
 We can now lookup our form by the name of its class:
 
-  >>> from cromlech.io.testing import TestRequest
+  >>> from cromlech.browser.testing import TestRequest
   >>> request = TestRequest()
 
   >>> from dolmen.forms.composed.ftests.forms.composed import Content

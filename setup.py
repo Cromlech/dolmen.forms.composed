@@ -10,9 +10,9 @@ history = open(join('docs', 'HISTORY.txt')).read()
 
 
 install_requires = [
-    'cromlech.browser',
-    'cromlech.io',
+    'cromlech.browser >= 0.5',
     'dolmen.forms.base',
+    'dolmen.view',
     'dolmen.template',
     'grokcore.component',
     'martian',
