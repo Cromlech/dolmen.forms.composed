@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from cromlech.browser import IRenderable, IRequest
-from dolmen.template import ITemplate, TALTemplate
+from cromlech.browser import IRenderable, IRequest, ITemplate
+from dolmen.template import TALTemplate
 from dolmen.forms.base import Form, FormCanvas
 from dolmen.forms.base.errors import Errors
 from dolmen.forms.base.interfaces import IPrefixable
