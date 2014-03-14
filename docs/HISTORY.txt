@@ -1,7 +1,13 @@
 Changelog
 =========
 
+2.0 (2014-03-14)
+----------------
+
+- Fixed the code to use the latest version of ``cromlech.browser``
+
+
 2.0a1 (2011-05-25)
 ------------------
 
-* Forked from `zeam.form.composed`. Using now the `Cromlech` framework.
+- Forked from `zeam.form.composed`. Using now the `Cromlech` framework.
